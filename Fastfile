@@ -44,6 +44,7 @@ platform :ios do
 
   desc "Build App Store build"
   lane :build_appstore do
+    precheck_version
     sync_signing_assets(type: "appstore")
     increment_build_number
     gym(
@@ -54,6 +55,7 @@ platform :ios do
 
   desc "Build Ad Hoc build"
   lane :build_adhoc do
+    precheck_version
     sync_signing_assets(type: "adhoc")
     increment_build_number
     gym(
@@ -69,6 +71,12 @@ platform :ios do
       team_name: "TeamName",
       changelog: "Version {lane_context[SharedValues::VERSION_NUMBER]}, Build {lane_context[SharedValues::BUILD_NUMBER]}
     )
+  end
+
+  desc "Check version for Appstore review with Precheck tool"
+  lane :precheck_version do
+    precheck
+    UI.success "Version meet requirements and ready for review"
   end
 
 end

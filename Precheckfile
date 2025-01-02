@@ -1,0 +1,12 @@
+app_identifier "com.app.identifier" # The bundle identifier of your app
+username "apple_id@gmail.com" # Your Apple email address
+team_name "TeamName"
+
+# negative_apple_sentiment(level: :skip)
+# curse_words(level: :warn)
+# future_functionality (level: :error)
+# other_platforms(level: :error)
+# placeholder_text(level: error)
+# test_words(level: error)
+# unreachable_urls(level: :error)
+custom_text(data: ["thunderbolt", "lightning", "frightening"], level: :warn)
