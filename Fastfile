@@ -57,6 +57,7 @@ platform :ios do
   lane :build_adhoc do
     precheck_version
     sync_signing_assets(type: "adhoc")
+    run_unit_tests
     increment_build_number
     gym(
       output_directory: "build_AdHoc",
@@ -78,5 +79,15 @@ platform :ios do
     precheck
     UI.success "Version meet requirements and ready for review"
   end
+
+  # To begin use scan, it must be seted up with command - fastlane scan init
+  # To be sure that Scanfile updated
+  # Might be need to edit Test Scheme - in Build section check Run
+
+  desc "Run Unit tests"
+  lane :run_unit_tests do
+    scan
+  end
+
 
 end

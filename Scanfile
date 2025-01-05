@@ -1,0 +1,3 @@
+scheme("YourTests")
+clean(true)
+open_report(true)
