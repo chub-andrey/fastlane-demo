@@ -2,6 +2,8 @@ default_platform(:ios)
 
 platform :ios do
 
+  slack_hook = "https://hooks.slack.com/services/....."
+
   desc "Setup Project in Apple system"
   lane :register_app do
     produce(
@@ -44,6 +46,7 @@ platform :ios do
 
   desc "Build App Store build"
   lane :build_appstore do
+    run_swiftlint(mode: "lint")
     precheck_version
     sync_signing_assets(type: "appstore")
     increment_build_number
@@ -55,6 +58,7 @@ platform :ios do
 
   desc "Build Ad Hoc build"
   lane :build_adhoc do
+    run_swiftlint(mode: "autocorrect")
     precheck_version
     sync_signing_assets(type: "adhoc")
     run_unit_tests
@@ -70,8 +74,13 @@ platform :ios do
     build_appstore
     pilot(
       team_name: "TeamName",
-      changelog: "Version {lane_context[SharedValues::VERSION_NUMBER]}, Build {lane_context[SharedValues::BUILD_NUMBER]}
+      changelog: "Version #{lane_context[SharedValues::VERSION_NUMBER]}, Build #{lane_context[SharedValues::BUILD_NUMBER]}"
     )
+   send_slack(
+     message: "Distribute build to AppStore",
+     version: lane_context[SharedValues::VERSION_NUMBER], 
+     build: lane_context[SharedValues::BUILD_NUMBER]
+   )
   end
 
   desc "Check version for Appstore review with Precheck tool"
@@ -89,5 +98,55 @@ platform :ios do
     scan
   end
 
+  lane :run_swiftlint do |options|
+    selectedMode = options[:mode]
+    
+    if selectedMode == "lint"
+      swiftlint(
+        mode: :lint,
+        config_file: ".swiftlint.yml",
+        output_file: "swiftlintOutput.txt",
+        ignore_exit_status: false
+      )
+    else
+      swiftlint(
+        mode: :autocorrect,
+        config_file: ".swiftlint.yml",
+        output_file: "swiftlintOutput.txt",
+        ignore_exit_status: false
+      )
+    end
+  end
+
+  private_lane :send_slack do |options|
+     messageText = options[:message] || "Default message"
+     versionNumber = options[:version]
+     buildNumber = options[:build]
+     pay = options[:payload]
+     isSuccess = options[:success] || false
+     dat = sh("date -u")
+
+     if buildNumber.empty?
+       slack(
+         message: messageText,
+         payload: pay,
+         default_payloads: [],
+         success: isSuccess,
+         slack_url: slack_hook
+       )
+     elsif pay.empty? && isSuccess
+       slack(
+         payload: {"FASTLANE PRODUCTION - #{versionNumber} (#{buildNumber})" => dat},
+         slack_url: slack_hook
+       )
+     else
+       slack(
+         message: messageText,
+         payload: pay,
+         success: isSuccess,
+         slack_url: slack_hook
+       )
+     end
+   end
 
 end
