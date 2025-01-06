@@ -18,6 +18,7 @@ platform :ios do
 
   # To begin use match, it must be seted up with command - fastlane match init
   # To be sure that Matchfile updated
+  # Some Match function's parameters defined in Matchfile
 
   desc "Sync Code-Signing assets"
   lane :sync_signing_assets do |options|
@@ -43,6 +44,7 @@ platform :ios do
 
   # To begin use gym, it must be seted up with command - fastlane gym init
   # To be sure that Gymfile updated
+  # Some Gym function's parameters defined in Gymfile
 
   desc "Build App Store build"
   lane :build_appstore do
@@ -83,6 +85,8 @@ platform :ios do
    )
   end
 
+  # Some Precheck function's parameters defined in Precheckfile
+
   desc "Check version for Appstore review with Precheck tool"
   lane :precheck_version do
     precheck
@@ -92,12 +96,18 @@ platform :ios do
   # To begin use scan, it must be seted up with command - fastlane scan init
   # To be sure that Scanfile updated
   # Might be need to edit Test Scheme - in Build section check Run
+  # Some Scan function's parameters defined in Scanfile
 
   desc "Run Unit tests"
   lane :run_unit_tests do
     scan
   end
 
+  # Lane has two parameters:
+  # run_swiftlint(mode: "lint") - just to check code by rules
+  # run_swiftlint(mode: "autocorrect") - auto correct by defined rules
+
+  desc "Run SwiftLint checks"
   lane :run_swiftlint do |options|
     selectedMode = options[:mode]
     
